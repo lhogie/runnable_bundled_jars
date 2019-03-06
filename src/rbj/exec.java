@@ -2,18 +2,17 @@ package rbj;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
-import java.util.Iterator;
+import java.util.Scanner;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 public class exec
 {
@@ -33,19 +32,15 @@ public class exec
 	{
 		String mainClass = null;
 
-		for (Iterator<JarEntry> i = bigJar.stream().iterator(); i.hasNext();)
+		for (JarEntry e : bigJar.stream().collect(Collectors.toList()))
 		{
-			JarEntry e = i.next();
-
 			if (e.getName().equals("main_class.txt"))
 			{
-				mainClass = new BufferedReader(
-						new InputStreamReader(bigJar.getInputStream(e))).readLine();
+				mainClass = new Scanner(bigJar.getInputStream(e)).nextLine();
 			}
 			else if (e.getName().endsWith(".jar"))
 			{
 				File f = new File(System.getProperty("java.io.tmpdir"), e.getName());
-
 				Files.copy(bigJar.getInputStream(e), f.toPath(), REPLACE_EXISTING);
 				load(f.toURL(), to);
 			}

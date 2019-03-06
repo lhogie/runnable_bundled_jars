@@ -4,11 +4,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
 public class assemble
@@ -24,12 +25,8 @@ public class assemble
 
 		File bigJar = new File(args[0]);
 		String classname = args[1];
-		List<File> jars = new ArrayList<>();
-
-		for (int i = 2; i < args.length; ++i)
-		{
-			jars.add(new File(args[i]));
-		}
+		List<File> jars = jars = Arrays.asList(args).subList(2, args.length).stream()
+				.map(e -> new File(e)).collect(Collectors.toList());
 
 		assemble(bigJar, classname, jars);
 	}
@@ -54,9 +51,8 @@ public class assemble
 		{
 			String classFileName = exec.class.getName().replace('.', '/') + ".class";
 			jos.putNextEntry(new ZipEntry(classFileName));
-			byte[] data = Files.readAllBytes(
-					Paths.get(exec.class.getResource("/" + classFileName).toURI()));
-			jos.write(data);
+			jos.write(Files.readAllBytes(
+					Paths.get(exec.class.getResource("/" + classFileName).toURI())));
 			jos.closeEntry();
 		}
 
