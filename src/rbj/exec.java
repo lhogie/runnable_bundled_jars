@@ -4,7 +4,6 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -41,6 +40,7 @@ public class exec
 			else if (e.getName().endsWith(".jar"))
 			{
 				File f = new File(System.getProperty("java.io.tmpdir"), e.getName());
+				f.getParentFile().mkdirs();
 				Files.copy(bigJar.getInputStream(e), f.toPath(), REPLACE_EXISTING);
 				load(f.toURL(), to);
 			}
@@ -59,9 +59,7 @@ public class exec
 		return new JarFile(cp);
 	}
 
-	private static void load(URL url, URLClassLoader cl)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException
+	private static void load(URL url, URLClassLoader cl) throws Throwable 
 	{
 		Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
 		method.setAccessible(true);

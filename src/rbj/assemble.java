@@ -2,6 +2,7 @@ package rbj;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -23,12 +24,8 @@ public class assemble
 			System.exit(1);
 		}
 
-		File bigJar = new File(args[0]);
-		String classname = args[1];
-		List<File> jars = jars = Arrays.asList(args).subList(2, args.length).stream()
-				.map(e -> new File(e)).collect(Collectors.toList());
-
-		assemble(bigJar, classname, jars);
+		assemble(new File(args[0]), args[1], Arrays.asList(args).subList(2, args.length)
+				.stream().map(e -> new File(e)).collect(Collectors.toList()));
 	}
 
 	public static void assemble(File bigJar, String classname, List<File> jars)
@@ -48,15 +45,15 @@ public class assemble
 			jos.closeEntry();
 		}
 
-		{
+		{ // adds the RBJ run class into the JAR
 			String classFileName = exec.class.getName().replace('.', '/') + ".class";
 			jos.putNextEntry(new ZipEntry(classFileName));
-			jos.write(Files.readAllBytes(
-					Paths.get(exec.class.getResource("/" + classFileName).toURI())));
+			URL res = exec.class.getResource("/" + classFileName);
+			jos.write(Files.readAllBytes(Paths.get(res.toURI())));
 			jos.closeEntry();
 		}
 
-		{
+		{ // tells which is the main class RBJ must execute
 			jos.putNextEntry(new ZipEntry("main_class.txt"));
 			jos.write(classname.getBytes());
 			jos.closeEntry();
