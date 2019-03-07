@@ -1,10 +1,12 @@
 package rbj;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.URL;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.jar.Attributes;
@@ -48,8 +50,8 @@ public class assemble
 		{ // adds the RBJ run class into the JAR
 			String classFileName = exec.class.getName().replace('.', '/') + ".class";
 			jos.putNextEntry(new ZipEntry(classFileName));
-			URL res = exec.class.getResource("/" + classFileName);
-			jos.write(Files.readAllBytes(Paths.get(res.toURI())));
+			jos.write(getContent(new BufferedInputStream(
+					exec.class.getResourceAsStream("/" + classFileName))));
 			jos.closeEntry();
 		}
 
@@ -60,5 +62,20 @@ public class assemble
 		}
 
 		jos.close();
+	}
+
+	public static byte[] getContent(InputStream in) throws IOException
+	{
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+		while (true)
+		{
+			int i = in.read();
+
+			if (i == - 1)
+				return bos.toByteArray();
+
+			bos.write(i);
+		}
 	}
 }
