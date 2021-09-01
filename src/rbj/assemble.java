@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
@@ -35,47 +36,54 @@ public class assemble
 	{
 		Manifest manifest = new Manifest();
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-		manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS,
-				exec.class.getName());
+		manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, run.class.getName());
 
 		JarOutputStream jos = new JarOutputStream(new FileOutputStream(bigJar), manifest);
 
 		for (File jar : jars)
 		{
 			jos.putNextEntry(new ZipEntry(jar.getName()));
-			jos.write(Files.readAllBytes(jar.toPath()));
+			
+			if (jar.isFile())
+			{
+				jos.write(Files.readAllBytes(jar.toPath()));
+			}
+			
 			jos.closeEntry();
+			
 		}
 
 		{ // adds the RBJ run class into the JAR
-			String classFileName = exec.class.getName().replace('.', '/') + ".class";
+			String classFileName = run.class.getName().replace('.', '/') + ".class";
 			jos.putNextEntry(new ZipEntry(classFileName));
-			jos.write(getContent(new BufferedInputStream(
-					exec.class.getResourceAsStream("/" + classFileName))));
+			jos.write(readAllBytes(new BufferedInputStream(
+					run.class.getResourceAsStream("/" + classFileName))));
 			jos.closeEntry();
 		}
 
 		{ // tells which is the main class RBJ must execute
-			jos.putNextEntry(new ZipEntry("main_class.txt"));
-			jos.write(classname.getBytes());
+			ZipEntry e = new ZipEntry(assemble.class.getPackage().getName() + "/run.properties");
+			jos.putNextEntry(e);
+			Properties p = new Properties();
+			p.put("main-class", classname);
+			p.store(jos, "");
 			jos.closeEntry();
 		}
 
 		jos.close();
 	}
 
-	public static byte[] getContent(InputStream in) throws IOException
+	public static byte[] readAllBytes(InputStream in) throws IOException
 	{
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-		while (true)
+		for (int i = in.read(); i != - 1; i = in.read())
 		{
-			int i = in.read();
-
-			if (i == - 1)
-				return bos.toByteArray();
-
 			bos.write(i);
 		}
+
+		in.close();
+		return bos.toByteArray();
 	}
+
 }
