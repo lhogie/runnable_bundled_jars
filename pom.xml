@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.github.lhogie</groupId>
 	<artifactId>dewibuja</artifactId>
-	<version>0.0.6.1</version>
+	<version>0.1.0</version>
 	<name>dewibuja</name>
 	<description>Toools for dealing with jars within jars</description>
 	<url>https://github.com/lhogie/runnable_bundled_jars</url>
