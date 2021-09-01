@@ -1,4 +1,4 @@
-package rbj;
+package dewibuja;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
